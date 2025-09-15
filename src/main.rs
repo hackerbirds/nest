@@ -1,26 +1,35 @@
 #![no_std]
 #![no_main]
 
-use aarch64_rt::entry;
-use arm_pl011_uart::{PL011Registers, Uart, UniqueMmioPointer};
-use core::{fmt::Write, panic::PanicInfo, ptr::NonNull};
+pub mod memory;
+pub mod uart;
+pub mod util;
+
+use core::arch::asm;
+use core::panic::PanicInfo;
 use smccc::{
     Hvc,
     psci::{system_off, system_reset},
 };
 
-const PL011_ADDRESS: *mut PL011Registers = 0x0900_0000 as _;
+use crate::uart::Pl011Uart;
 
-entry!(main);
-fn main(_arg0: u64, _arg1: u64, _arg2: u64, _arg3: u64) -> ! {
-    let uart_ptr = unsafe { UniqueMmioPointer::new(NonNull::new(PL011_ADDRESS).unwrap()) };
-    let mut uart = Uart::new(uart_ptr);
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".text.boot")]
+pub extern "C" fn boot() -> ! {
+    unsafe {
+        asm!(
+            "ldr x30, =stack_top",
+            "mov sp, x30",
+            "bl {main}",
+            main = sym main,
+            options(noreturn)
+        );
+    }
+}
 
-    writeln!(
-        uart,
-        "the first twig has been placed. the nest is coming together."
-    )
-    .unwrap();
+fn main() -> ! {
+    Pl011Uart::print(b"the first twig has been placed. the nest is coming together.\n");
 
     system_off::<Hvc>().unwrap();
 

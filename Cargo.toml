@@ -8,6 +8,5 @@ opt-level = 0
 debug = true 
 
 [dependencies]
-aarch64-rt = { version = "0.2.2", default-features = false, features = ["el1"]}
-arm-pl011-uart = "0.3.2"
 smccc = "0.2.2"
+spin = "0.10.0"
