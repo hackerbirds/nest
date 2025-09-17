@@ -19,9 +19,10 @@ SECTIONS {
     . += 0x1000; /* 4kB stack */
     stack_top = .;
 
-    . = ALIGN(4096); /* align page */
-    heap_start = .;
-    . += 1024 * 1024; /* 1mb heap */
-    heap_end = .;
-
+    . = ALIGN(0x1000);
+    . += 0x1000;
+    pagetable_level0 = .;
+    . = ALIGN(0x1000);
+    . += 0x1000;
+    pagetable_level1 = .;
 }

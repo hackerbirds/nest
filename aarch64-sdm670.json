@@ -25,5 +25,5 @@
     "kcfi",
     "kernel-address"
   ],
-  "target-pointer-width": "64"
+  "target-pointer-width": 64
 }

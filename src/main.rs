@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![feature(naked_functions_rustic_abi)]
 
 pub mod memory;
 pub mod uart;
@@ -13,13 +14,14 @@ use core::panic::PanicInfo;
 use smccc::{Hvc, psci::system_off};
 
 use crate::{
+    memory::setup_mmu,
     uart::Pl011Uart,
     util::{ElLevel, el_level},
 };
 
 unsafe extern "C" {
-    static mut heap_start: u8;
-    static mut heap_end: u8;
+    static mut pagetable_level0: u8;
+    static mut pagetable_level1: u8;
 }
 
 #[global_allocator]
@@ -40,19 +42,12 @@ pub extern "C" fn boot() -> ! {
 }
 
 fn main() -> ! {
-    Pl011Uart::print(b"the first twig has been placed.\n");
-
-    // Initiate allocator
-    // SAFETY: Heap pointers are defined by linker
     unsafe {
-        const HEAP_SIZE: usize = 1024 * 1024;
-
-        let heap_start_addr = (&raw mut heap_start).addr();
-        let heap_end_addr = (&raw mut heap_end).addr();
-
-        debug_assert_eq!(heap_end_addr - heap_start_addr, HEAP_SIZE);
-
-        HEAP_ALLOCATOR.lock().init(heap_start_addr, HEAP_SIZE);
+        setup_mmu();
+        Pl011Uart::print(b"mmu set up.\n");
+        HEAP_ALLOCATOR
+            .lock()
+            .init((&raw mut pagetable_level0).addr(), 0x1000);
     }
 
     Pl011Uart::print(b"the nest is coming together.\n");
