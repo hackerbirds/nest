@@ -20,9 +20,9 @@ SECTIONS {
     stack_top = .;
 
     . = ALIGN(0x1000);
-    . += 0x1000;
     pagetable_level0 = .;
-    . = ALIGN(0x1000);
     . += 0x1000;
+    . = ALIGN(0x1000);
     pagetable_level1 = .;
+    . += 0x1000;
 }

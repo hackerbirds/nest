@@ -7,22 +7,19 @@ pub mod uart;
 pub mod util;
 
 extern crate alloc;
+extern crate spin;
 
 use buddy_system_allocator::LockedHeap;
 use core::arch::asm;
 use core::panic::PanicInfo;
 use smccc::{Hvc, psci::system_off};
 
+use crate::memory::{KERNEL_END_ADDRESS_RWE, KERNEL_START_ADDRESS_RWE};
 use crate::{
     memory::setup_mmu,
     uart::Pl011Uart,
     util::{ElLevel, el_level},
 };
-
-unsafe extern "C" {
-    static mut pagetable_level0: u8;
-    static mut pagetable_level1: u8;
-}
 
 #[global_allocator]
 pub static HEAP_ALLOCATOR: LockedHeap<33> = LockedHeap::empty();
@@ -44,10 +41,15 @@ pub extern "C" fn boot() -> ! {
 fn main() -> ! {
     unsafe {
         setup_mmu();
-        Pl011Uart::print(b"mmu set up.\n");
-        HEAP_ALLOCATOR
-            .lock()
-            .init((&raw mut pagetable_level0).addr(), 0x1000);
+
+        HEAP_ALLOCATOR.lock().init(
+            KERNEL_START_ADDRESS_RWE,
+            0x40000,
+        );
+
+        let vec = b"twig\n".to_vec();
+
+        Pl011Uart::print(&vec);
     }
 
     Pl011Uart::print(b"the nest is coming together.\n");

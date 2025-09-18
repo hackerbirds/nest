@@ -10,7 +10,7 @@ pub fn el_level() -> ElLevel {
     el.into()
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ElLevel {
     EL0,
     EL1,
