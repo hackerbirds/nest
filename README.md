@@ -12,10 +12,10 @@ Control-A + X to exit
 
 ### debugging
 
-`llvm target/aarch64-sdm670/debug/nest`
-in llvm:
-`gdb-remote localhost:1234`
-`c` to continue execution
-`dis` to see assembly
-`si` to continue instructions one by one
-`register read <REGISTER_NAME>`
+with `lldb`:
+- `lldb target/aarch64-sdm670/debug/nest`
+- `gdb-remote localhost:1234`
+- `c` to continue execution
+- `dis` to see assembly
+- `si` to continue instructions one by one
+- `register read <REGISTER_NAME>`
